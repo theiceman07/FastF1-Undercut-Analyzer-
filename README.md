@@ -1,145 +1,129 @@
-🏎️ F1 Undercut Analyzer (FastF1 Colab Project)
-🔍 Analyze race strategies, tyre degradation, and telemetry with real Formula 1 data — powered by FastF1.
-🧠 Overview
+# 🏎️ FastF1 Undercut Analyzer (Google Colab)
 
-This project uses the FastF1
- Python library to mine and visualize Formula 1 telemetry and timing data.
+An interactive, single-cell **Formula 1 race analysis** notebook built with **FastF1**.  
+It auto-loads a race session, cleans lap data, visualizes team pace and tyre degradation, and **detects potential undercut/overcut battles** with side-by-side telemetry overlays.
 
-Unlike most F1 data notebooks, this project focuses on identifying and analyzing undercut and overcut scenarios — where one driver gains or loses time by pitting earlier or later than a rival.
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/<YOUR_USER>/<YOUR_REPO>/blob/main/<YOUR_NOTEBOOK>.ipynb)
 
-It’s built to run directly in Google Colab, fully automated, and robust against common FastF1 errors.
+---
 
-🚀 Features
+## ✨ What this notebook does
 
-📦 Automatic session loading
-Loads the latest completed F1 race automatically, or lets you pick a specific race, round, or session (Race, Quali, Sprint, etc.).
+- 🔄 **Smart session selection**  
+  Choose latest completed race automatically, by round, or by GP name.
+- 🧹 **Robust data cleaning**  
+  Uses `pick_quicklaps()` + outlier trimming and sanity filters.
+- 🧰 **Race summaries**  
+  - Results table (position, team, best lap, etc.)  
+  - **Stint summary** (compound & stint length)
+- 📊 **Team race pace**  
+  Boxplot of quick-lap pace by team.
+- 🧵 **Tyre degradation**  
+  Scatter + per-driver trendlines (lap time vs lap).
+- 🔁 **Undercut/overcut detector**  
+  Finds drivers who pitted within a given lap window and compares lap times **before/after** their stops.
+- 📈 **Telemetry overlay**  
+  Fastest-lap **Speed / Throttle / Brake** overlays for two drivers (battle pair or top-2 finishers).
+- ⚡ **Caching & retries**  
+  Uses a local cache and gentle retries for reliability in Colab.
 
-🧹 Error-safe data cleaning
-Handles invalid laps, SC/VSC periods, formation laps, and telemetry gaps gracefully.
+---
 
-⚙️ Race analysis toolkit
+## ⚙️ Parameters (edit at the top)
 
-Full results table with driver and team info
+| Key | Purpose | Values / Notes |
+|---|---|---|
+| `STRATEGY` | How to pick the session | `"auto"` (latest in `YEAR`), `"by_name"` (use `GRAND_PRIX`), `"by_round"` (use `ROUND`) |
+| `YEAR` | Championship year | e.g., `2024` |
+| `GRAND_PRIX` | Race name (partial ok) | e.g., `"Bahrain"`, `"Monza"` *(used if `STRATEGY="by_name"`)*
+| `ROUND` | Round number | `1..22` *(used if `STRATEGY="by_round"`)*
+| `SESSION` | Session code | `"R"` (race), `"Q"`, `"SQ"`, `"S"`, `"FP1/2/3"` |
+| `LAPTIME_MIN_S` | Drop laps faster than this (glitches) | default `50` |
+| `OUTLIER_Q` | Trim top slow outliers among quick laps | default `0.99` (drop slowest 1%) |
+| `MAX_TELEMETRY_DRIVERS` | Max drivers in telemetry overlay | default `2` |
+| `PIT_WINDOW_LAPS` | Pits within ±N laps count as a battle | default `3` |
 
-Tyre stints summary
+> Tip: For a specific race, set `STRATEGY="by_name"`, `YEAR=2024`, `GRAND_PRIX="Bahrain"` (or any partial name).
 
-Team pace distribution (boxplot of “quick laps”)
+---
 
-Tyre degradation plots per driver/stint
+## ▶️ How to run (Colab)
 
-Automatic undercut/overcut detection (finds drivers who pit within ±3 laps)
+1. Click the **Open in Colab** badge above (replace the link with your repo path).  
+2. Run the notebook **top to bottom**. First cell installs dependencies.  
+3. (Optional) Edit **`PARAMS`** to pick a different race/session.  
+4. Scroll to the outputs: results, stint table, team boxplot, tyre-deg, **undercut timeline**, and **telemetry overlays**.
 
-Telemetry overlay for battle drivers (speed, throttle, brake inputs)
+The notebook creates a cache at `/content/f1cache` so repeated runs are faster.
 
-📈 Extendable
-Export data, compare drivers, visualize compounds, or compute deltas with your own extra cells.
+---
 
-🧩 Unique Concept
+## 📸 Outputs you’ll see
 
-💡 “Undercut Analyzer” — a novel data mining tool for studying race strategies.
+- **Results table** (Position, Team, Best lap, etc.)  
+- **Stint summary** per driver (compound & length)  
+- **Team pace boxplot** (quick-laps)  
+- **Tyre degradation plot** with per-driver trendlines  
+- **Undercut/overcut timeline** (lap time vs lap with pit-in markers)  
+- **Telemetry overlays** (Speed, Throttle & Brake) for the battle pair or top-2 finishers
 
-Instead of only showing fastest laps or sector times, this notebook quantifies and visualizes pit stop strategy interactions:
+---
 
-Detects drivers who pit within a few laps of each other.
+## 🛠️ Dependencies
 
-Compares their lap times before and after the stop.
-
-Highlights which strategy (early or late stop) was faster.
-
-Overlays the telemetry to show why one gained time (e.g., warmer tyres, better traction, less traffic).
-
-⚙️ Installation & Usage (Colab)
-
-Open Google Colab
-
-Create a new notebook
-
-Copy and paste the full code from this repository (the single “Undercut Analyzer” cell)
-
-Run the cell
-
-Wait for the FastF1 data to download and cache (first run may take 1–2 minutes)
-
-Once the outputs appear, scroll through:
-
-Results table
-
-Tyre stints summary
-
-Team pace boxplot
-
-Tyre degradation plot
-
-Undercut/overcut battle timeline
-
-Telemetry overlay
-
-🔧 Configuration
-
-At the top of the notebook, edit the PARAMS dictionary to choose what you want to analyze:
-
-PARAMS = {
-    "STRATEGY": "auto",        # "auto", "by_name", or "by_round"
-    "YEAR": 2024,
-    "GRAND_PRIX": "Monaco",    # used if STRATEGY = "by_name"
-    "ROUND": 8,                # used if STRATEGY = "by_round"
-    "SESSION": "R",            # "R", "Q", "S", "SQ", "FP1" etc.
-    "PIT_WINDOW_LAPS": 3,      # how close pit stops must be to count as a 'battle'
-}
-
-
-Tip: You can set STRATEGY="by_name" and change GRAND_PRIX to any valid 2024 event name (e.g., "Monza", "Singapore", "Abu Dhabi").
-
-📊 Example Outputs
-
-Race Results – sorted by position, with lap times and points
-
-Team Pace – boxplot comparing quick-lap distributions
-
-Tyre Degradation – per-driver lap time trendlines
-
-Undercut Battle – lap-time timelines before and after pit stops
-
-Telemetry Overlay – side-by-side fastest-lap comparison (speed, throttle, brake)
-
-🧱 Extending the Project
-
-You can easily add more cells below the main analysis:
-
-Compare average pace between drivers
-drivers = ["VER", "LEC", "HAM"]
-for d in drivers:
-    avg = clean.pick_driver(d)["LapTime"].dt.total_seconds().mean()
-    print(f"{d}: average lap time = {avg:.2f} s")
-
-Plot lap times by tyre compound
-df = laps.copy()
-df["LapTime_s"] = df["LapTime"].dt.total_seconds()
-for comp, g in df.groupby("Compound"):
-    plt.scatter(g["LapNumber"], g["LapTime_s"], s=10, alpha=0.5, label=comp)
-plt.legend(); plt.show()
-
-Export lap data
-laps.to_csv("/content/lap_data_export.csv", index=False)
-
-🧰 Dependencies
-
-FastF1
-
+Installed automatically in the first cell:
+```text
+fastf1
 pandas
-
+matplotlib
 numpy
 
-matplotlib
+🧩 How the notebook is structured
 
-All are automatically installed in Colab by the script.
+Install & imports
 
-🧾 License
+Parameters (PARAMS)
 
-MIT License – feel free to use, adapt, and extend for your own racing analytics projects.
+Cache enable (/content/f1cache)
 
-👨‍💻 Malligaarjunan
+Matplotlib + FastF1 plotting setup
 
-Created with ❤️ by [Your Name]
-Powered by FastF1
- and Google Colab.
+Helper functions
+
+choose_session (auto/by_name/by_round with retries)
+
+clean_laps, stint_summary
+
+team_pace_boxplot, tyre_deg_plot
+
+find_undercut_pair, gap_before_after, plot_undercut_timeline
+
+telemetry_overlay
+
+Session load & results table
+
+Laps, summaries, and visualizations
+
+Undercut detection + telemetry overlay
+
+Done message & re-run hint
+
+🧪 Notes & tips
+
+If the live schedule API is slow, the code retries and falls back to 2024 Bahrain Race.
+
+Telemetry overlay needs at least two valid quick laps; otherwise the notebook shows the top-2 finishers.
+
+Plots hide extreme outliers to keep visuals readable.
+
+🙏 Acknowledgements
+
+Built on top of FastF1
+ by @theOehrly and contributors.
+
+Data provided via public F1 timing sources accessed through FastF1.
+
+📜 License
+
+This notebook is for educational/research purposes.
+If you publish or share, please credit FastF1 and this repository.
